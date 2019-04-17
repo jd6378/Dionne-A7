@@ -1,0 +1,163 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        
+        <style>
+            .error
+            {
+                border:1px red solid
+            }
+            .selected
+            {
+                color: blue;
+            }
+            .btn-block
+            {
+                background-color: black;
+                border-radius: 0px;
+                border: solid white;
+                padding: 13%;
+                border-bottom: 25px solid white;
+            }
+            .btn-wrong
+            {
+               background-color: red;
+            }
+            .btn-right
+            {
+                background-color: green;
+            }
+        </style>
+    </head>
+    
+    <body>
+        
+        <div class="container">
+            <h2>Treasure Hunt</h2>
+            <div class="row" id="grid"></div>
+            <h6 id="guesses">Guesses: 0</h6>
+        </div>
+        
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        
+        
+        <div id='confirm' class="modal" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header bg-dark text-light">
+                <h5 class="modal-title">Play Again?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>Would you like to play again?</p>
+              </div>
+              <div class="modal-footer">
+                <button id='yes' type="button" class="btn btn-primary">Yes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+              </div>
+            </div>
+          </div>
+        </div> 
+            
+        </div>
+        
+        <script>
+            /* global $ */
+            $(document).ready(function()
+            {
+                let model = {};
+                function initializeModel()
+                {
+                    model.gridheight = 3;
+                    model.guesses = 0;
+                    model.correcti = 0;
+                    model.correctj = 0;
+                    initArray();
+                }
+                
+                function initArray()
+                {
+                    model.array = new Array(model.gridheight);
+                    $.each(model.array, function(i, result) 
+                    {
+                        model.array[i] = new Array(2);
+                        $.each(model.array[i], function(j, result) 
+                        {
+                            model.array[i][j] = 0;
+                        })
+                    })
+                    model.correcti = Math.floor(Math.random() * model.array.length)
+                    model.correctj = Math.floor(Math.random() * 2)
+                }
+                
+                function updateView()
+                {
+                    $('#grid').empty();
+                    $.each(model.array, function(i, result)
+                    {
+                        if(model.array[i][0] == -1)
+                        {
+                            $('#grid').append($('<div class="col-sm-6"></div>').append($('<button id="" type="button" class="btn-wrong btn-block"></button>').attr("i", i).attr("j",0)))
+                        }
+                        if(model.array[i][0] == 0)
+                        {
+                            $('#grid').append($('<div class="col-sm-6"></div>').append($('<button id="" type="button" class="btn-block"></button>').attr("i", i).attr("j",0)))
+                        }
+                        if(model.array[i][0] == 1)
+                        {
+                            $('#grid').append($('<div class="col-sm-6"></div>').append($('<button id="" type="button" class="btn-right btn-block"></button>').attr("i", i).attr("j",0)))
+                        }
+                        if(model.array[i][1] == -1)
+                        {
+                            $('#grid').append($('<div class="col-sm-6"></div>').append($('<button id="" type="button" class="btn-wrong btn-block"></button>').attr("i", i).attr("j",1)))
+                        }
+                        if(model.array[i][1] == 0)
+                        {
+                            $('#grid').append($('<div class="col-sm-6"></div>').append($('<button id="" type="button" class="btn-block"></button>').attr("i", i).attr("j",1)))
+                        }
+                        if(model.array[i][1] == 1)
+                        {
+                            $('#grid').append($('<div class="col-sm-6"></div>').append($('<button id="" type="button" class="btn-right btn-block"></button>').attr("i", i).attr("j",1)))
+                        }
+                    });
+                    $('#guesses').empty().text("guesses: " + parseInt(model.guesses));
+                };
+                
+            $(document).on("click","button",function() 
+            {
+                let i = parseInt($(this).attr('i'));
+                let j = parseInt($(this).attr('j'));
+                if (model.array[i][j] == 0)
+                {
+                    if(parseInt(model.correcti) == i && parseInt(model.correctj) == j)
+                    {
+                        model.array[i][j] = 1;
+                        $('#confirm').modal('show')
+                    }
+                    else
+                    {
+                        model.array[i][j] = -1;
+                    }
+                    model.guesses++
+                    updateView();
+                }
+            });
+            
+            $('#yes').click(function()
+            {
+                $('#confirm').modal('hide')
+                initArray()
+                model.guesses = 0;
+                updateView()
+            })
+                
+            initializeModel();
+            updateView();
+            });
+        </script>
+    </body>
+</html>
